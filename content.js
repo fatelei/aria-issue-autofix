@@ -110,5 +110,15 @@ chrome.runtime.onMessage.addListener(function (msg, sender, response) {
       title.text = msg.title;
       head.appendChild(title);
     }
+
+    // Check a tag.
+    var linkEles = document.getElementsByTagName('a');
+    length = linkEles.length;
+    for (i = 0; i < linkEles.length; i++) {
+      ele = linkEles[i];
+      if (!ele.getAttribute('alt')) {
+        ele.setAttribute('alt', ele.getAttribute('href') || "");
+      }
+    }
   }
 });
