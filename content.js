@@ -1,66 +1,135 @@
-chrome.runtime.onMessage.addListener(function (msg, sender, response) {
-  if (msg.text && msg.text == 'aria') {
-    var i = 0;
-    var tabindex = 0;
-    var ele = null;
-    var length;
+var tabindex = 0;
 
-    // Check input elements.
-    var inputEles = document.getElementsByTagName('input');
-    length = inputEles.length;
-    for (i = 0; i < length; i++) {
-      ele = inputEles[i];
-      var rightAttributes = [
-        'placeholder',
-        'aria-label',
-        'aria-labelledby',
-        'title'
-      ];
+var fixControlElements = function (controlEles) {
+  var ele = null;
+  var length;
+  var i = 0;
 
-      var checkAttr = rightAttributes.reduce(function (prev, cur) {
-        return ele.getAttribute(prev) || ele.getAttribute(cur);
-      });
+  length = controlEles.length;
+  for (i = 0; i < length; i++) {
+    ele = controlEles[i];
+    var rightAttributes = [
+      'placeholder',
+      'aria-label',
+      'aria-labelledby',
+      'title'
+    ];
 
-      if (!checkAttr) {
-        // Check parent and silbling.
+    var checkAttr = rightAttributes.reduce(function (prev, cur) {
+      return ele.getAttribute(prev) || ele.getAttribute(cur);
+    });
 
-        if (!ele.previousElementsSibling && !ele.nextElementSibling) {
-          if (ele.parentElement.tagName !== 'LABEL') {
-            // Correct it. using simple method.
-            console.log(ele.outerHTML + ': is invalid');
-            ele.setAttribute('title', ele.getAttribute('id') || ele.getAttribute('name') || ele.getAttribute('value'));
-          }
-        } else {
-          if (ele.previousElementsSibling && ele.previousElementSibling.tagName !== 'LABEL') {
-            if (ele.nextElementSibling && ele.nextElementSibling.tagName !== 'LABEL') {
-              if (ele.parentElement.tagName !== 'LABEL') {
-                // Correct it. using simple method.
-                console.log(ele.outerHTML + ': is invalid');
-                ele.setAttribute('title', ele.getAttribute('id') || ele.getAttribute('name') || ele.getAttribute('value'));
-              }
-            } else {
-              if (ele.parentElement.tagName !== 'LABEL') {
-                // Correct it. using simple method.
-                console.log(ele.outerHTML + ': is invalid');
-                ele.setAttribute('title', ele.getAttribute('id') || ele.getAttribute('name') || ele.getAttribute('value'));
-              }
+    if (!checkAttr) {
+      // Check parent and silbling.
+
+      if (!ele.previousElementsSibling && !ele.nextElementSibling) {
+        if (ele.parentElement.tagName !== 'LABEL') {
+          // Correct it. using simple method.
+          console.log(ele.outerHTML + ': is invalid');
+          ele.setAttribute('title', ele.getAttribute('id') || ele.getAttribute('name') || ele.getAttribute('value'));
+        }
+      } else {
+        if (ele.previousElementsSibling && ele.previousElementSibling.tagName !== 'LABEL') {
+          if (ele.nextElementSibling && ele.nextElementSibling.tagName !== 'LABEL') {
+            if (ele.parentElement.tagName !== 'LABEL') {
+              // Correct it. using simple method.
+              console.log(ele.outerHTML + ': is invalid');
+              ele.setAttribute('title', ele.getAttribute('id') || ele.getAttribute('name') || ele.getAttribute('value'));
             }
-          } else if (ele.nextElementSibling && ele.nextElementSibling.tagName !== 'LABEL') {
+          } else {
             if (ele.parentElement.tagName !== 'LABEL') {
               // Correct it. using simple method.
               console.log(ele.outerHTML + ': is invalid');
               ele.setAttribute('title', ele.getAttribute('id') || ele.getAttribute('name') || ele.getAttribute('value'));
             }
           }
+        } else if (ele.nextElementSibling && ele.nextElementSibling.tagName !== 'LABEL') {
+          if (ele.parentElement.tagName !== 'LABEL') {
+            // Correct it. using simple method.
+            console.log(ele.outerHTML + ': is invalid');
+            ele.setAttribute('title', ele.getAttribute('id') || ele.getAttribute('name') || ele.getAttribute('value'));
+          }
         }
       }
-
-      var curTabindex = ele.getAttribute('tabindex');
-
-      if (curTabindex && curTabindex >= 0) {
-        ele.setAttribute('tabindex', tabindex--);
-      }
     }
+
+    var curTabindex = ele.getAttribute('tabindex');
+
+    if (curTabindex && curTabindex >= 0) {
+      ele.setAttribute('tabindex', tabindex--);
+    }
+  }
+};
+
+
+chrome.runtime.onMessage.addListener(function (msg, sender, response) {
+  if (msg.text && msg.text == 'aria') {
+    var i = 0;
+    var ele = null;
+    var length;
+
+    // Check input elements.
+    var inputEles = document.getElementsByTagName('input');
+    fixControlElements(inputEles);
+
+    // Check select elements.
+    var selectEles = document.getElementsByTagName('select');
+    fixControlElements(selectEles); 
+    
+    // length = inputEles.length;
+    // for (i = 0; i < length; i++) {
+    //   ele = inputEles[i];
+    //   var rightAttributes = [
+    //     'placeholder',
+    //     'aria-label',
+    //     'aria-labelledby',
+    //     'title'
+    //   ];
+
+    //   var checkAttr = rightAttributes.reduce(function (prev, cur) {
+    //     return ele.getAttribute(prev) || ele.getAttribute(cur);
+    //   });
+
+    //   if (!checkAttr) {
+    //     // Check parent and silbling.
+
+    //     if (!ele.previousElementsSibling && !ele.nextElementSibling) {
+    //       if (ele.parentElement.tagName !== 'LABEL') {
+    //         // Correct it. using simple method.
+    //         console.log(ele.outerHTML + ': is invalid');
+    //         ele.setAttribute('title', ele.getAttribute('id') || ele.getAttribute('name') || ele.getAttribute('value'));
+    //       }
+    //     } else {
+    //       if (ele.previousElementsSibling && ele.previousElementSibling.tagName !== 'LABEL') {
+    //         if (ele.nextElementSibling && ele.nextElementSibling.tagName !== 'LABEL') {
+    //           if (ele.parentElement.tagName !== 'LABEL') {
+    //             // Correct it. using simple method.
+    //             console.log(ele.outerHTML + ': is invalid');
+    //             ele.setAttribute('title', ele.getAttribute('id') || ele.getAttribute('name') || ele.getAttribute('value'));
+    //           }
+    //         } else {
+    //           if (ele.parentElement.tagName !== 'LABEL') {
+    //             // Correct it. using simple method.
+    //             console.log(ele.outerHTML + ': is invalid');
+    //             ele.setAttribute('title', ele.getAttribute('id') || ele.getAttribute('name') || ele.getAttribute('value'));
+    //           }
+    //         }
+    //       } else if (ele.nextElementSibling && ele.nextElementSibling.tagName !== 'LABEL') {
+    //         if (ele.parentElement.tagName !== 'LABEL') {
+    //           // Correct it. using simple method.
+    //           console.log(ele.outerHTML + ': is invalid');
+    //           ele.setAttribute('title', ele.getAttribute('id') || ele.getAttribute('name') || ele.getAttribute('value'));
+    //         }
+    //       }
+    //     }
+    //   }
+
+    //   var curTabindex = ele.getAttribute('tabindex');
+
+    //   if (curTabindex && curTabindex >= 0) {
+    //     ele.setAttribute('tabindex', tabindex--);
+    //   }
+    // }
 
     // Check images.
     var imgEles = document.getElementsByTagName('img');
@@ -118,6 +187,12 @@ chrome.runtime.onMessage.addListener(function (msg, sender, response) {
       ele = linkEles[i];
       if (!ele.getAttribute('alt')) {
         ele.setAttribute('alt', ele.getAttribute('href') || "");
+      }
+
+      var curTabindex = ele.getAttribute('tabindex');
+
+      if (curTabindex && curTabindex >= 0) {
+        ele.setAttribute('tabindex', tabindex--);
       }
     }
   }
